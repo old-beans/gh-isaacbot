@@ -541,7 +541,7 @@ async def item(ctx, item_num):
 
     if item.unlocked == True:
 
-        message = f"{item.num_name} -- {item.cost}gp\n  {item.description}\n  Current stock: {item.numberAvailable}\n  Known copies: {item.maxCount}"
+        message = f"{item.num_name} -- {item.cost}gp\n{item.description}\n  Current stock: {item.numberAvailable}\n  Known copies: {item.maxCount}"
 
     else:
 
