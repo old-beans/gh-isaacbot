@@ -533,8 +533,20 @@ async def item(ctx, item_num):
     # adds selected abilities to the character pool
     # You can only add one at a time
     author = ctx.message.author.name
+    character = Character(author)
+    party = Party(character.party[0])
+    world = World(character.campaign[0])
 
     item = Item(item_num)
+
+    if item.unlocked == True:
+
+        message = f"{item.num_name} -- {item.cost}gp\n  {item.description}\n  Current stock: {item.numberAvailable}\n  Known copies: {item.maxCount}"
+
+    else:
+
+        message = "We don't have that item. Never even heard of it. Let us know if you find one!"
+
 
     await ctx.send(f"```{message}```")
 
@@ -610,7 +622,7 @@ async def buy(ctx, *item_nums):
                         character.item_transaction('gain', item.number)
                         # item.store_transaction(False)
                         character = Character(author)
-                        message = f"{character.name} bought {item.num_name} for {price}gp"
+                        message = f"{character.name} bought {item.num_name} for {price}gp\n{item.description}"
                         await ctx.send(f"```{message}```")
 
                     else:
@@ -682,7 +694,7 @@ async def loot(ctx, item_num, *design):
 
             item = Item(item_num)
 
-            message = f"Thank you, {character.name}! Our most skilled artisans will get right to work on crafting this...\nIt's Ready.\n{item.num_name} -- {item.cost}gp"
+            message = f"Thank you, {character.name}! Our most skilled artisans will get right to work on crafting this...\nIt's Ready.\n{item.num_name} -- {item.cost}gp\n{item.description}"
 
 
         elif item.maxCount == item.realMax:
@@ -706,7 +718,7 @@ async def loot(ctx, item_num, *design):
 
         else:
 
-            message = f"{character.name} looted {item.num_name}!\nSince they already own a copy, the item is now available for purchase."
+            message = f"{character.name} looted {item.num_name}!\nSince they already own a copy, the item is now available for purchase.\n{item.num_name} -- {item.cost}gp\n{item.description}"
 
 
     await ctx.send(f"```{message}```")
