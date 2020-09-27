@@ -256,7 +256,7 @@ async def lose(ctx, thing_to_lose, *thing):
     party = Party(character.party[0])
 
     if thing_to_lose == 'item':
-        item_num = thing.strip[0](',')
+        item_num = thing[0].strip(',')
 
         item = Item(item_num)
         
@@ -271,7 +271,7 @@ async def lose(ctx, thing_to_lose, *thing):
             message = f"You don't own that item. Please try again.\nItems: {sorted(character.item_nums)}"
 
     elif thing_to_lose == 'ability':
-        ability_num = thing.strip[0](',')
+        ability_num = thing[0].strip(',')
         ability = Ability(ability_num)
 
         if int(ability.number) in character.abil_nums:
@@ -462,8 +462,6 @@ async def levelup(ctx, *abil_nums):
 async def display(ctx, option):
     author = ctx.message.author.name
     character = Character(author)
-    party = Party(character.party[0])
-    world = World(character.campaign[0])
 
     if option == 'abilities':
         
@@ -516,8 +514,6 @@ async def ability(ctx, ability_num):
     # You can only add one at a time
     author = ctx.message.author.name
     character = Character(author)
-    party = Party(character.party[0])
-    world = World(character.campaign[0])
 
     ability = Ability(ability_num)
 
@@ -537,20 +533,8 @@ async def item(ctx, item_num):
     # adds selected abilities to the character pool
     # You can only add one at a time
     author = ctx.message.author.name
-    character = Character(author)
-    party = Party(character.party[0])
-    world = World(character.campaign[0])
 
     item = Item(item_num)
-
-    if item.unlocked == True:
-
-        message = f"{item.num_name} -- {item.cost}gp\n  {item.description}\n  Current stock: {item.numberAvailable}\n  Known copies: {item.maxCount}"
-
-    else:
-
-        message = "We don't have that item. Never even heard of it. Let us know if you find one!"
-
 
     await ctx.send(f"```{message}```")
 
@@ -607,8 +591,6 @@ async def buy(ctx, *item_nums):
     author = ctx.message.author.name
     character = Character(author)
     party = Party(character.party[0])
-    world = World(character.campaign[0])
-
 
     for item in item_nums:
         item = item.strip(',')
@@ -655,8 +637,6 @@ async def sell(ctx, *item_nums):
 
     author = ctx.message.author.name
     character = Character(author)
-    party = Party(character.party[0])
-    world = World(character.campaign[0])
 
     for item in item_nums:
         item = item.strip(',')
@@ -690,8 +670,6 @@ async def loot(ctx, item_num, *design):
     author = ctx.message.author.name
     
     character = Character(author)
-    party = Party(character.party[0])
-    world = World(character.campaign[0])
     item = Item(item_num)
     design = list(design)
 
