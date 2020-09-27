@@ -671,10 +671,10 @@ async def loot(ctx, item_num, *design):
     
     character = Character(author)
     item = Item(item_num)
+
     design = list(design)
 
-
-    if 'des' in design:
+    if 'design' in design[0]:
 
         if item.unlocked == False:
 
