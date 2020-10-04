@@ -537,7 +537,7 @@ class Ability:
 
         self.number = abil_num
 
-        self.lvl= self.ability['fields']['levelRequirement']
+        self.lvl= self.ability['fields']['levelRequired']
 
         self.charclass = classes_airtable.get(self.ability['fields']['class'][0])['fields']['name']
 
