@@ -141,6 +141,8 @@ async def gain (ctx, thing_to_gain, *thing):
     world = World(character.campaign[0])
     party = Party(character.party[0])
 
+    parse_gain(thing_to_gain, *thing)
+
     if thing_to_gain == 'item':
         item_num = thing[0].strip(',')
         
@@ -249,7 +251,7 @@ async def gain (ctx, thing_to_gain, *thing):
 
 
 @bot.command(aliases=['remove'])
-async def lose(ctx, thing_to_lose, *thing):
+async def lose(ctx, thing_to_lose, *, things):
     author = ctx.message.author.name
     character = Character(author)
     world = World(character.campaign[0])
@@ -686,7 +688,7 @@ async def loot(ctx, item_num, *design):
 
     design = list(design)
 
-    if 'design' in design[0]:
+    if design:
 
         if item.unlocked == False:
 
@@ -711,9 +713,10 @@ async def loot(ctx, item_num, *design):
 
             character.item_transaction('loot', item.number)
 
-            message = f"""{character.name} looted {item.num_name}!
-    Gold:  {character.gold}gp
-    Items: {sorted(character.item_nums)}"""
+            message = f"""{character.name} looted {item.num_name}! 
+ {item.description}
+   Gold:  {character.gold}gp
+   Items: {sorted(character.item_nums)}"""
 
 
         else:
