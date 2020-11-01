@@ -249,7 +249,7 @@ async def gain (ctx, thing_to_gain, *thing):
 
 
 @bot.command(aliases=['remove'])
-async def lose(ctx, thing_to_lose, *, things):
+async def lose(ctx, thing_to_lose, *thing):
     author = ctx.message.author.name
     character = Character(author)
     world = World(character.campaign[0])
