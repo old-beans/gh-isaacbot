@@ -141,8 +141,6 @@ async def gain (ctx, thing_to_gain, *thing):
     world = World(character.campaign[0])
     party = Party(character.party[0])
 
-    parse_gain(thing_to_gain, *thing)
-
     if thing_to_gain == 'item':
         item_num = thing[0].strip(',')
         
