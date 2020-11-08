@@ -750,16 +750,16 @@ async def complete_scenario(ctx, scene_no):
 
         scenario.mark_complete()
 
-    if scenario.complete == True:
-
-        message = f"{scene_no}: {scenario.name} --  Complete"
-
     else:
 
         message = f"You haven't discovered Scenario {scene_no}. Please double-check and try again, or use !unlock."
 
-    await ctx.send(f"```{message}```")
+    if scenario.complete == True:
 
+        message = f"{scene_no}: {scenario.name} --  Complete"
+
+
+    await ctx.send(f"```{message}```")
 
 
 
