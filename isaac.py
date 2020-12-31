@@ -594,6 +594,23 @@ async def scenario(ctx, scene_no, *action_text):
 
         message = f'Your notes about Scenario {scenario.number} have been saved.\n"{description_text}"'
 
+    elif 'complete' in action_text[0]:
+
+        del action_text[0]
+
+        await ctx.invoke(complete_scenario(scene_no))
+
+        return
+
+    elif 'unlock' in action_text[0]:
+
+        del action_text[0]
+
+        await ctx.invoke(discover_scenario(scene_no, action_text))
+
+        return 
+    
+    
     await ctx.send(f"```{message}```")
 
 
@@ -750,14 +767,19 @@ async def complete_scenario(ctx, scene_no):
 
         scenario.mark_complete()
 
-        message = f"{scene_no}: {scenario.name} --  Complete"
-
+<<<<<<< HEAD
+=======
     else:
 
         message = f"You haven't discovered Scenario {scene_no}. Please double-check and try again, or use !unlock."
 
-    await ctx.send(f"```{message}```")
+    if scenario.complete == True:
 
+>>>>>>> 87fc395ac5fdadbc5ff926705f4b588c630c497e
+        message = f"{scene_no}: {scenario.name} --  Complete"
+
+
+    await ctx.send(f"```{message}```")
 
 
 
