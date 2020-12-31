@@ -750,8 +750,6 @@ async def complete_scenario(ctx, scene_no):
 
         scenario.mark_complete()
 
-    if scenario.complete == True:
-
         message = f"{scene_no}: {scenario.name} --  Complete"
 
     else:
