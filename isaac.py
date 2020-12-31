@@ -594,6 +594,23 @@ async def scenario(ctx, scene_no, *action_text):
 
         message = f'Your notes about Scenario {scenario.number} have been saved.\n"{description_text}"'
 
+    elif 'complete' in action_text[0]:
+
+        del action_text[0]
+
+        await ctx.invoke(complete_scenario(scene_no))
+
+        return
+
+    elif 'unlock' in action_text[0]:
+
+        del action_text[0]
+
+        await ctx.invoke(discover_scenario(scene_no, action_text))
+
+        return 
+    
+    
     await ctx.send(f"```{message}```")
 
 
