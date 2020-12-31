@@ -750,20 +750,6 @@ async def complete_scenario(ctx, scene_no):
 
         scenario.mark_complete()
 
-<<<<<<< HEAD
-=======
-    else:
-
-        message = f"You haven't discovered Scenario {scene_no}. Please double-check and try again, or use !unlock."
-
-    if scenario.complete == True:
-
->>>>>>> 87fc395ac5fdadbc5ff926705f4b588c630c497e
-        message = f"{scene_no}: {scenario.name} --  Complete"
-
-
-    await ctx.send(f"```{message}```")
-
 
 
 bot.run(DISCORD_TOKEN)
