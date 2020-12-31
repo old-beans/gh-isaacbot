@@ -245,24 +245,22 @@ class Party:
 
     def discount_calc(self, reputation):
         # determine discount based on reputation. Used for buy action
-        if self.reputation == 20:
 
-            discount = -5
+        for j in range(len(self.discount_levels)):
+            if self.reputation >= 19:
+                discount = -5
 
-        elif self.reputation == -20:
-
-            discount = 5
-
-        else:
+            elif abs(self.reputation) >= self.discount_levels[j] and self.reputation < self.discount_levels[j+1]:
+                discount = -j
+                break
+            
+            else:
+                continue
+            
+            if reputation < 0:
+                
+                discount = discount * -1
         
-            for j in range(len(self.discount_levels)):
-                if abs(self.reputation) >= self.discount_levels[j] and self.reputation < self.discount_levels[j+1]:
-                    discount = -j
-                    break
-                else:
-                    continue
-                if reputation < 0:
-                    discount = discount * -1
         return discount
 
     def gain_reputation(self):
