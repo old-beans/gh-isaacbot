@@ -507,48 +507,50 @@ async def display(ctx, option):
     await ctx.send(f"```{message}```")
 
 
-@bot.command(aliases=['abil'])
-async def ability(ctx, ability_num):
-    # command input !ability X
-    # adds selected abilities to the character pool
-    # You can only add one at a time
-    author = ctx.message.author.name
-    character = Character(author)
-
-    ability = Ability(ability_num)
-
-    if ability.lvl <= character.lvl:
-
-        message = f"{ability.number}: {ability.name} -- {ability.charclass} Lvl {ability.lvl}"
-
-    else:
-
-        message = f"That ability is above your level. You can't see it until you earn it."
-
-    await ctx.send(f"```{message}```")
-
-@bot.command()
-async def item(ctx, item_num):
-    # command input !item X
-    # adds selected abilities to the character pool
-    # You can only add one at a time
-    author = ctx.message.author.name
-    character = Character(author)
-    party = Party(character.party[0])
-    world = World(character.campaign[0])
-
-    item = Item(item_num)
-
-    if item.unlocked == True:
-
-        message = f"{item.num_name} -- {item.cost}gp\n{item.description}\n  Current stock: {item.numberAvailable}\n  Known copies: {item.maxCount}"
-
-    else:
-
-        message = "We don't have that item. Never even heard of it. Let us know if you find one!"
+#@bot.command(aliases=['abil'])
+#async def ability(ctx, ability_num):
+#    # command input !ability X
+#    # adds selected abilities to the character pool
+#    # You can only add one at a time
+#    author = ctx.message.author.name
+#    character = Character(author)
+#
+#    ability = Ability(ability_num)
+#
+#    if ability.lvl <= character.lvl:
+#
+#        message = f"{ability.number}: {ability.name} -- {ability.charclass} Lvl {ability.lvl}"
+#
+#    else:
+#
+#        message = f"That ability is above your level. You can't see it until you earn it."
+#
+#    await ctx.send(f"```{message}```")
 
 
-    await ctx.send(f"```{message}```")
+
+#@bot.command()
+#async def item(ctx, item_num):
+#    # command input !item X
+#    # adds selected abilities to the character pool
+#    # You can only add one at a time
+#    author = ctx.message.author.name
+#    character = Character(author)
+#    party = Party(character.party[0])
+#    world = World(character.campaign[0])
+#
+#    item = Item(item_num)
+#
+#    if item.unlocked == True:
+#
+#        message = f"{item.num_name} -- {item.cost}gp\n{item.description}\n  Current stock: {item.numberAvailable}\n  Known copies: {item.maxCount}"
+#
+#    else:
+#
+#        message = "We don't have that item. Never even heard of it. Let us know if you find one!"
+#
+#
+#    await ctx.send(f"```{message}```")
 
 
 @bot.command(aliases=['scene','scen'])
