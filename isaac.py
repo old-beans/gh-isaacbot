@@ -8,7 +8,8 @@ load_dotenv()
 from airtable import Airtable
 from discord.ext import commands
 from datetime import datetime
-from gh import World, Scenario, Party, Character, Item, Ability
+import gh
+from gh import World, Scenario, Party, Character, Item, Ability, Player
 
 # perks_airtable = Airtable(AIRTABLE_BASE_KEY, perks_sheet) # perks record lookup
 
@@ -23,53 +24,38 @@ async def on_ready():
 
 
 
+@bot.command(aliases=['changecharacter', 'changechar', 'changech', 'switch_character',  'switchcharacter', 'switchchar', 'switchch', 'switch'])
+async def change_character(ctx, ch_name):
+    # !change_character 'Gunga Galunga'
+    author = ctx.message.author.name
+    player = Player(author)
+    try:
+        old_character = Character(author)
+        old_character.deactivate()
+    except:
+        pass
 
-@bot.command(aliases=['Help'])
-async def help(ctx):
-# Get list of possible actions. alternative to !help
+    player.activate_character(ch_name)
+    new_character = Character(author)
 
-    
-    message = f"""
-Greetings!  I am Isaac-Bot, the Record Keeper of Gloomhaven. 
-Please select from the following commands  {"* = Optional":>}
-
-!stats *Xxp *Ygp *Zch     {"Update the author's stats":.<24}
-NEW -- Use a '+' in front of any cost to ADD to your current toal. eg !stats +12xp             
-NEW -- Mix Additions and Totals eg '!stats +24xp 49g +1ch'
-
-!gain/add XYZ  {"Add to the author's current total":.<24}
-!lose/remove XYZ  {"Add to the author's current total":.<24}
-NEW -- XYZ can be any one of the following - Xxp, Xgp, Xch, item X, ability X
-
-!levelup X, *y            {"Add Ability card x to author's pool":.<24}
-
-!donate                   {"Transfers 10 gold from author to the Sanctuary":.<24}
-
-!buy X, *Y                {"Purchase item X and update gold, store":.<24}
-!sell X, *Y               {"Sell item X and update gold, store":.<24}
-
-!loot X                   {"Unlock one copy and add it to character inventory for 0gp":.<24}
-!loot X design            {"Unlock all copies and adds them to store inventory":.<24}
-
-!ability list             {"Display list of Lvl 2+ abilities in character pool":.<24}
-
-!item list                {"Display a list of item in character inventory":.<24}
-!item X details           {"Displays details for item X"}
-
-!teamstats                {"Get Donations, Prosperity, and Reputation"}
-!gain/lose pros           {"Check 1 box on Prosperity track":.<24}
-  Automatically checks for Overall Prosperity increase and unlcoks new itemsx
-!gain/lose rep            {"Add 1 reputation for the author's party":.<24}
-
-
-!discover/unlock X "Name" "Description"    {"Unlockss a new scenario and updates Name and Description":.<24}
-  Name and Description must be separately wrapped in quotes
-!complete X               {"Mark a scenario complete":.<24}
-!scenario X details       {"Shows info and details about the scenario":.<24}
-!scenario X description   {"Update the description for scenario X":.<24}
-"""
+    message = f"""Character Change Completed
+    Deactivated {old_character.name}
+    Active Character is now {new_character.name}"""
 
     await ctx.send(f"```{message}```")
+
+
+@bot.command(aliases=['newch', 'newcharacter', 'createch', 'create_character', 'createchar'])
+async def new_character(ctx, ch_name, ch_class):
+    author = ctx.message.author.name
+    old_character = Character(author)
+    old_character.deactivate()
+
+    player = Player(author)
+    player.create_character(ch_name, ch_class)
+    character = Character(author)
+    message = f"Welcome, {character.name}\nThis is now your active character."
+    ctx.send(message)
 
 
 @bot.command(aliases=["getall","worldstats","campaignstats","partystats"])
@@ -106,31 +92,21 @@ async def donate(ctx):
 
         message = f"You only have {character.gold}. Better pick up some more goin in the next battle, or check your stats."
             
-
     else:
-        
         character.gain_gold(-10)
-
-        world.donate()
-        
+        world.donate()        
         message = f"The Sanctuary of the Great Oak thanks you. Have a blessed battle!\nDonations: {world.donations}......{character.name}: {character.gold} gold left"
 
 
         if world.donations in world.donation_levels:
-
             if world.donations == 100:
-
                 message = f"{message}\n\nThe Sanctuary has received a total of 100 gold in donations.\nPlease open Envelope B."
-
             world.gain_prosperity()
-            
             message = f"{message}\n\n+1 prosperity......{world.pticks}/{world.prosperity_levels[world.prosperity]}"
 
             if world.pticks == world.prosperity_levels[world.prosperity - 1]:
-
                 message = f"{message}\n\n*The Overall Prosperity has increased to {world.prosperity}*\nNew items are now available in the item store.\nAll characters may level up to Lvl{world.prosperity} while in Gloomhaven."
-                            
-
+                
     await ctx.send(f"```{message}```")
 
 
@@ -143,28 +119,19 @@ async def gain (ctx, thing_to_gain, *thing):
 
     if thing_to_gain == 'item':
         item_num = thing[0].strip(',')
-        
         item = Item(item_num)
-        
         if item.unlocked == True:
-
             if item.number not in character.item_nums:
-
                 if item.numberAvailable > 0:
-
                     character.item_transaction('gain', item.number)
-
                     message = f"{character.name} gained {item.num_name}.\n  Items: {character.item_nums}"
 
                 else:
-
                     message = f"There are no copies of {item.num_name} available in the store."
 
             else:
-
                 message = f"You already own {item.num_name}! You cannot own two copies.I should striek you down right here, so help me Blood God!"
         else:
-
             message = f"Item {item.number} is not unlocked. Use !loot to add scenario loot or items unlocked via road or city event."
 
     elif thing_to_gain == 'ability':
@@ -173,76 +140,49 @@ async def gain (ctx, thing_to_gain, *thing):
             ability = Ability(ability_num)
 
             if character.lvl < int(ability.lvl):
-
                 message = f"That card ({ability.lvl}) is above your level. Please select an ability of Level {character.lvl} or lower to add to your pool."
 
             else:
-
                 if character.charclass != ability.charclass:
-
                     message = f"Please choose an ability card from your own dang class."
-
                 else: 
-
                     if ability.ability['id'] in character.abilities:
-
                         message = f"Ability {ability.number} is already in your pool. Please choose again."
 
                     else:
-
                         character.abil_transaction('gain', ability.number)
-
                         message = f"Level {ability.lvl} - {ability.name} [{ability.number}] added to your pool.\nAbilities: {sorted(character.abil_nums)}"
         else:
             message = f"You have added too many abilities. You are Level {character.lvl} so you can only have {character.lvl-1} level 2+ abilities in your pool."
 
     elif 'rep' in thing_to_gain:
-
         party.gain_reputation()
-
         message = f"{party.name} +1 Reputation:\nReputation: {party.reputation}    Discount: {party.discount}"
 
     elif 'pros' in thing_to_gain:
-
         world.gain_prosperity()
-
         message = f"{world.name} +1 Prosperity:\nProsperity: {world.pticks}/{world.prosperity_levels[world.prosperity]}    Overall: {world.prosperity}"
 
         if world.pticks == world.prosperity_levels[world.prosperity - 1]:
-
             message = f"{message}\nThe Overall Prosperity has increased to {world.prosperity}\nNew items are now available in the item store.\nAll characters may level up to Lvl{world.prosperity} while in Gloomhaven."
 
     elif 'xp' in thing_to_gain:
-        
         xp = int(re.sub("[^0-9]", "", thing_to_gain))
-        
         lvl_up = character.gain_xp(xp)
-
         message = f"{character.name} gained {xp}xp\n{character.xp}xp {character.gold}gp {character.checks}{character.ch}"
-        
-        
         if lvl_up == True:
-
             message = f"{message}\nYou reached Level {character.lvl}! You may level up when you return to Gloomhaven."
 
     elif 'gold' in thing_to_gain or 'gp' in thing_to_gain:
-
         gold = int(re.sub("[^0-9]", "", thing_to_gain))
-
         character.gain_gold(gold)
-
         message = f"{character.name} gained {gold}gp\n{character.xp}xp {character.gold}gp {character.checks}{character.ch}"
 
     elif 'ch' in thing_to_gain:
-        
         checks = int(re.sub("[^0-9]", "", thing_to_gain))
-
         character.gain_checks(checks)
-        
         message = f"{character.name} gained {checks}checks\n{character.xp}xp {character.gold}gp {character.checks}{character.ch}"
-        
         if character.checks % 3 == 0:
-
             message = f"{message}\nYou earned your 3rd check. Gain a Perk!"
 
     await ctx.send(f"```{message}```")
@@ -751,6 +691,64 @@ async def complete_scenario(ctx, scene_no):
     if scenario.unlocked == True:
 
         scenario.mark_complete()
+
+
+
+
+
+@bot.command(aliases=['Help'])
+async def help(ctx):
+# Get list of possible actions. alternative to !help
+
+    
+    message = f"""
+Greetings!  I am Isaac-Bot, the Record Keeper of Gloomhaven. 
+Please select from the following commands  {"* = Optional":>}
+
+!stats *Xxp *Ygp *Zch     {"Update the author's stats":.<24}
+NEW -- Use a '+' in front of any cost to ADD to your current toal. eg !stats +12xp             
+NEW -- Mix Additions and Totals eg '!stats +24xp 49g +1ch'
+
+!gain/add XYZ  {"Add to the author's current total":.<24}
+!lose/remove XYZ  {"Add to the author's current total":.<24}
+NEW -- XYZ can be any one of the following - Xxp, Xgp, Xch, item X, ability X
+
+!levelup X, *y            {"Add Ability card x to author's pool":.<24}
+
+!donate                   {"Transfers 10 gold from author to the Sanctuary":.<24}
+
+!buy X, *Y                {"Purchase item X and update gold, store":.<24}
+!sell X, *Y               {"Sell item X and update gold, store":.<24}
+
+!loot X                   {"Unlock one copy and add it to character inventory for 0gp":.<24}
+!loot X design            {"Unlock all copies and adds them to store inventory":.<24}
+
+!ability list             {"Display list of Lvl 2+ abilities in character pool":.<24}
+
+!item list                {"Display a list of item in character inventory":.<24}
+!item X details           {"Displays details for item X"}
+
+!teamstats                {"Get Donations, Prosperity, and Reputation"}
+!gain/lose pros           {"Check 1 box on Prosperity track":.<24}
+  Automatically checks for Overall Prosperity increase and unlcoks new itemsx
+!gain/lose rep            {"Add 1 reputation for the author's party":.<24}
+
+
+!discover/unlock X "Name" "Description"    {"Unlockss a new scenario and updates Name and Description":.<24}
+  Name and Description must be separately wrapped in quotes
+!complete X               {"Mark a scenario complete":.<24}
+!scenario X details       {"Shows info and details about the scenario":.<24}
+!scenario X description   {"Update the description for scenario X":.<24}
+"""
+
+    await ctx.send(f"```{message}```")
+
+
+
+
+
+
+
 
 
 

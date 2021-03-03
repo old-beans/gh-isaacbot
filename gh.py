@@ -20,6 +20,28 @@ storylines_airtable = Airtable(AIRTABLE_BASE_KEY, 'Storylines')
 players_airtable = Airtable(AIRTABLE_BASE_KEY, 'Players')
 achievements_airtable = Airtable(AIRTABLE_BASE_KEY, 'Achievements')
 
+class Player:
+    character_levels = (0,45,95,150,210,275,345,420,500) 
+    prosperity_levels = (0,4,9,15,22,30,39,50,64)
+
+
+    def __init__(self, author):
+        self.name = author
+        self.player_rec = players_airtable.match('name', author)
+    
+    def activate_character(self, ch_name):
+        character_rec = characters_airtable.match('name', ch_name)
+        characters_airtable.update(character_rec['id'], {'discordUsername': [self.player_rec['id']], 'isActive': True})
+
+    def create_character(self, ch_name, ch_class):
+        self.world = World(campaign_airtable.match('name', 'Camp Pain')['id'])
+        self.party = Party(party_airtable.match('name', 'Wyld Stallyns')['id'])
+        prosperity = self.world.prosperity
+        xp = self.character_levels[prosperity]
+        gold = (prosperity + 1) * 15
+        charclass = classes_airtable.match('name', ch_class)['id']
+        characters_airtable.insert({'name': ch_name, 'xp': xp, 'gold': gold, 'checks': 0, 'class': [charclass], 'isActive': True, 'owner': [self.player_rec['id']], 'discordUsername': [self.player_rec['id']]  , 'campaign': [self.world.campaign_rec['id']], 'party': [self.party.party_rec['id']]})
+
 
 class World:
     # campaign_rec, name, donations, pticks, prosperity, achievements
@@ -220,6 +242,7 @@ class Character:
         self.gold = self.character_rec['fields']['gold']
         self.checks = self.character_rec['fields']['checks']
         self.ch = self.check_calc()
+        self.id = self.character_rec['id']
 
         try:
             self.items = self.character_rec['fields']['items']
@@ -240,6 +263,12 @@ class Character:
             characters_airtable.update(self.character_rec['id'], {'abilities':self.abilities})
         
         self.abil_nums = sorted(abilities_airtable.get(a)['fields']['number'] for a in self.abilities)
+
+    def activate(self):
+        self.character_rec = author
+
+    def deactivate(self):
+        characters_airtable.update(self.id, {'discordUsername': '', 'isActive': False})
 
 
     def gain_xp(self, xp_gained):
@@ -269,6 +298,7 @@ class Character:
         else:
             return False
 
+
     def lvl_calc(self):
         if self.xp >= 500:
             level = 9
@@ -285,6 +315,7 @@ class Character:
         characters_airtable.update(self.character_rec['id'], {'gold':self.gold})
         print(f"[Isaacbot Logger]--{datetime.now()}-- {self.name} +{gold_gained}gp  Total: {self.gold}gold")
 
+
     def change_gold(self, new_gold):
         # update author gold to input
         self.gold = new_gold
@@ -299,12 +330,14 @@ class Character:
         print(f"[Isaacbot Logger]--{datetime.now()}-- {self.name} +{checks_gained} checks  Total: {self.checks}checks")
         self.ch = self.check_calc()
 
+
     def change_checks(self, new_checks):
         self.checks = new_checks
         characters_airtable.update(self.character_rec['id'], {'checks':self.checks})
         # update author checks to input
         print(f"[Isaacbot Logger]--{datetime.now()}-- {self.name}  Total: {self.checks}checks")
         self.ch = self.check_calc()
+
 
     def check_calc(self):
         if self.checks == 1:
@@ -318,6 +351,7 @@ class Character:
         # abil must be given as a list of Airtable record ID eg [rec92398626]
         self. abilities = self.abilities + list(abil_to_add)
         characters_airtable.update(self.character_rec['id'], {'abilities':self.abilities})
+
 
     def item_transaction(self, action, item_num):
         item = Item(item_num)
@@ -337,7 +371,6 @@ class Character:
 
 
     def abil_transaction(self, action, abil_num):
-
         abil = Ability(abil_num)
 
         if action == 'gain':
@@ -409,3 +442,6 @@ class Ability:
         self.charclass = classes_airtable.get(self.ability['fields']['class'][0])['fields']['name']
         self.name = self.ability['fields']['name']
         self.num_name = f"Lvl {self.lvl} -- {self.name}"
+
+
+print('done')
