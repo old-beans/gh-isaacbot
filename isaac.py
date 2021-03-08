@@ -57,6 +57,20 @@ async def new_character(ctx, ch_name, ch_class):
     message = f"Welcome, {character.name}\nThis is now your active character."
     ctx.send(message)
 
+@bot.command()
+async def retire(ctx, *quest):
+    author = ctx.message.author.name
+    character = Character(author)
+
+    if quest:
+        character.retire(quest[0].strip(','))
+    else:
+        character.retire()
+
+    message = f'Congratulations on your retirement. To begin a new character, use !newch "Character Name" "Character Class"'
+    
+    await ctx.send(f"```{message}```")
+
 
 @bot.command(aliases=["getall","worldstats","campaignstats","partystats"])
 async def teamstats(ctx):

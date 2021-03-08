@@ -264,12 +264,12 @@ class Character:
         
         self.abil_nums = sorted(abilities_airtable.get(a)['fields']['number'] for a in self.abilities)
 
-    def activate(self):
-        self.character_rec = author
+
+    def retire(self, quest=''):
+        characters_airtable.update(self.character_rec['id'], {'isActive': False, 'isRetired': True, 'quest': quest})
 
     def deactivate(self):
         characters_airtable.update(self.id, {'discordUsername': '', 'isActive': False})
-
 
     def gain_xp(self, xp_gained):
         self.xp += xp_gained
