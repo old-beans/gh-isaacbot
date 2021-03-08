@@ -40,7 +40,15 @@ class Player:
         xp = self.character_levels[prosperity]
         gold = (prosperity + 1) * 15
         charclass = classes_airtable.match('name', ch_class)['id']
-        characters_airtable.insert({'name': ch_name, 'xp': xp, 'gold': gold, 'checks': 0, 'class': [charclass], 'isActive': True, 'owner': [self.player_rec['id']], 'discordUsername': [self.player_rec['id']]  , 'campaign': [self.world.campaign_rec['id']], 'party': [self.party.party_rec['id']]})
+        characters_airtable.insert(
+            {
+                'name': ch_name, 'xp': xp, 'gold': gold, 'checks': 0, 'class': [charclass], 'isActive': True, 
+                'owner': [self.player_rec['id']], 'discordUsername': [self.player_rec['id']], 
+                'campaign': [self.world.campaign_rec['id']], 'party': [self.party.party_rec['id']]
+                })
+
+
+        print(f"[Isaacbot Logger]--{datetime.now()}-- New Character {ch_name}  {ch_class} ")
 
 
 class World:

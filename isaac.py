@@ -29,18 +29,23 @@ async def change_character(ctx, ch_name):
     # !change_character 'Gunga Galunga'
     author = ctx.message.author.name
     player = Player(author)
+
     try:
         old_character = Character(author)
         old_character.deactivate()
+        player.activate_character(ch_name)
+        new_character = Character(author)
+
+        message = f"""Character Change Completed
+        Deactivated {old_character.name}
+        Active Character is now {new_character.name}"""
+
     except:
-        pass
+        player.activate_character(ch_name)
+        new_character = Character(author)
 
-    player.activate_character(ch_name)
-    new_character = Character(author)
-
-    message = f"""Character Change Completed
-    Deactivated {old_character.name}
-    Active Character is now {new_character.name}"""
+        message = f"""Character Change Completed
+        Active Character is now {new_character.name}"""
 
     await ctx.send(f"```{message}```")
 
@@ -48,14 +53,23 @@ async def change_character(ctx, ch_name):
 @bot.command(aliases=['newch', 'newcharacter', 'createch', 'create_character', 'createchar'])
 async def new_character(ctx, ch_name, ch_class):
     author = ctx.message.author.name
-    old_character = Character(author)
-    old_character.deactivate()
-
+    
+    try:
+        old_character = Character(author)
+        old_character.deactivate()
+        player.create_character(ch_name, ch_class)
+        character = Character(author)
+        message = f"Welcome, {character.name}\nThis is now your active character."
+    
+    except:
+        pass
+    
     player = Player(author)
     player.create_character(ch_name, ch_class)
     character = Character(author)
     message = f"Welcome, {character.name}\nThis is now your active character."
-    ctx.send(message)
+    
+    await ctx.send(f"```{message}```")
 
 
 @bot.command(aliases=["getall","worldstats","campaignstats","partystats"])
