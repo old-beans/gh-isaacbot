@@ -71,6 +71,20 @@ async def new_character(ctx, ch_name, ch_class):
     
     await ctx.send(f"```{message}```")
 
+@bot.command()
+async def retire(ctx, *quest):
+    author = ctx.message.author.name
+    character = Character(author)
+
+    if quest:
+        character.retire(quest[0].strip(','))
+    else:
+        character.retire()
+
+    message = f'Congratulations on your retirement. To begin a new character, use !newch "Character Name" "Character Class"'
+    
+    await ctx.send(f"```{message}```")
+
 
 @bot.command(aliases=["getall","worldstats","campaignstats","partystats"])
 async def teamstats(ctx):
@@ -719,13 +733,18 @@ async def help(ctx):
 Greetings!  I am Isaac-Bot, the Record Keeper of Gloomhaven. 
 Please select from the following commands  {"* = Optional":>}
 
+--- NEW Commands ---
+!retire *quest (optional command)
+!newcharacter "Character Name" "Character Class"
+!changecharacter "Character Name"
+
 !stats *Xxp *Ygp *Zch     {"Update the author's stats":.<24}
-NEW -- Use a '+' in front of any cost to ADD to your current toal. eg !stats +12xp             
-NEW -- Mix Additions and Totals eg '!stats +24xp 49g +1ch'
+Use a '+' in front of any cost to ADD to your current toal. eg !stats +12xp             
+Mix Additions and Totals eg '!stats +24xp 49g +1ch'
 
 !gain/add XYZ  {"Add to the author's current total":.<24}
 !lose/remove XYZ  {"Add to the author's current total":.<24}
-NEW -- XYZ can be any one of the following - Xxp, Xgp, Xch, item X, ability X
+XYZ can be any one of the following - Xxp, Xgp, Xch, item X, ability X
 
 !levelup X, *y            {"Add Ability card x to author's pool":.<24}
 
