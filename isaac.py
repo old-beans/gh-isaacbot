@@ -719,6 +719,7 @@ async def help(ctx):
 Greetings!  I am Isaac-Bot, the Record Keeper of Gloomhaven. 
 Please select from the following commands  {"* = Optional":>}
 
+--- NEW Commands ---
 !retire *quest (optional command)
 !newcharacter "Character Name" "Character Class"
 !changecharacter "Character Name"
