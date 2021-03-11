@@ -158,7 +158,7 @@ class Scenario:
 
 
 
-        def mark_unlocked(self, scene_name, scene_description):
+        def mark_unlocked(self, scene_name, scene_description=''):
             self.unlocked = self.scenario['fields']['isUnlocked'] = True
             self.name = scene_name
             self.description = scene_description

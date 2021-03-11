@@ -521,15 +521,15 @@ async def display(ctx, option):
 #    await ctx.send(f"```{message}```")
 
 
-@bot.command(aliases=['scene','scen'])
+@bot.command(aliases=['scene','scen', 's'])
 async def scenario(ctx, scene_no, *action_text):
 # !scenario 12 unlocked
 # !scenario 12 complete We ran away with the treasure
-  
     scenario = Scenario(scene_no)
     action_text = list(action_text)
 
-    if 'details' in action_text:
+    info_words = ('details', 'info')
+    if any(ele in action_text for ele in info_words):
 
         if scenario.unlocked == False:
 
@@ -696,14 +696,18 @@ async def loot(ctx, item_num, *design):
 
 
 @bot.command(aliases=['unlock', 'discover'])
-async def discover_scenario(ctx, scene_no, scene_name, scene_description):
+async def discover_scenario(ctx, scene_no, scene_name, *scene_description):
     # command input "!unlockscen 1 Black Barrow"
     # multi-word Scene Name's and Descriptions must be wrapped in ""
     scene_no = scene_no.strip(":")
     scenario = Scenario(scene_no)
 
     # scene_name = ' '.join(scene_name)
-    scenario.mark_unlocked(scene_name, scene_description)
+    if scene_description:
+        scenario.mark_unlocked(scene_name, description=scene_description)
+    
+    else:
+        scenario.mark_unlocked(scene_name)
 
     message = f"{scenario.number}: {scenario.name} -- Unlocked\n{scenario.description}"
 
@@ -719,9 +723,6 @@ async def complete_scenario(ctx, scene_no):
     if scenario.unlocked == True:
 
         scenario.mark_complete()
-
-
-
 
 
 @bot.command(aliases=['Help'])
