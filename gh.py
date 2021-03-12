@@ -27,7 +27,7 @@ class Player:
 
     def __init__(self, author):
         self.name = author
-        self.player_rec = players_airtable.match('name', author)
+        self.player_rec = players_airtable.match('discordUsername', author)
     
     def activate_character(self, ch_name):
         character_rec = characters_airtable.match('name', ch_name)
