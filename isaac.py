@@ -1,8 +1,10 @@
 # Isaac the Record Master
 # Discord bot 
 
-
-import discord, fstrings, re, random, os
+import discord
+import re 
+import random
+import os
 from dotenv import load_dotenv
 load_dotenv()
 from airtable import Airtable
@@ -15,7 +17,9 @@ from gh import World, Scenario, Party, Character, Item, Ability, Player
 
 
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')  # stored in .env
-bot = commands.Bot(command_prefix = "!", help_command = None)
+intents = discord.Intents.all()
+intents.message_content = True
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.event
 async def on_ready():
@@ -725,65 +729,57 @@ async def complete_scenario(ctx, scene_no):
         scenario.mark_complete()
 
 
-@bot.command(aliases=['Help'])
-async def help(ctx):
-# Get list of possible actions. alternative to !help
+# @bot.command(aliases=['Help'])
+# async def help(ctx):
+# # Get list of possible actions. alternative to !help
 
     
-    message = f"""
-Greetings!  I am Isaac-Bot, the Record Keeper of Gloomhaven. 
-Please select from the following commands  {"* = Optional":>}
+#     message = f"""
+# Greetings!  I am Isaac-Bot, the Record Keeper of Gloomhaven. 
+# Please select from the following commands  {"* = Optional":>}
 
---- NEW Commands ---
-!retire *quest (optional command)
-!newcharacter "Character Name" "Character Class"
-!changecharacter "Character Name"
+# --- NEW Commands ---
+# !retire *quest (optional command)
+# !newcharacter "Character Name" "Character Class"
+# !changecharacter "Character Name"
 
-!stats *Xxp *Ygp *Zch     {"Update the author's stats":.<24}
-Use a '+' in front of any cost to ADD to your current toal. eg !stats +12xp             
-Mix Additions and Totals eg '!stats +24xp 49g +1ch'
+# !stats *Xxp *Ygp *Zch     {"Update the author's stats":.<24}
+# Use a '+' in front of any cost to ADD to your current toal. eg !stats +12xp             
+# Mix Additions and Totals eg '!stats +24xp 49g +1ch'
 
-!gain/add XYZ  {"Add to the author's current total":.<24}
-!lose/remove XYZ  {"Add to the author's current total":.<24}
-XYZ can be any one of the following - Xxp, Xgp, Xch, item X, ability X
+# !gain/add XYZ  {"Add to the author's current total":.<24}
+# !lose/remove XYZ  {"Add to the author's current total":.<24}
+# XYZ can be any one of the following - Xxp, Xgp, Xch, item X, ability X
 
-!levelup X, *y            {"Add Ability card x to author's pool":.<24}
+# !levelup X, *y            {"Add Ability card x to author's pool":.<24}
 
-!donate                   {"Transfers 10 gold from author to the Sanctuary":.<24}
+# !donate                   {"Transfers 10 gold from author to the Sanctuary":.<24}
 
-!buy X, *Y                {"Purchase item X and update gold, store":.<24}
-!sell X, *Y               {"Sell item X and update gold, store":.<24}
+# !buy X, *Y                {"Purchase item X and update gold, store":.<24}
+# !sell X, *Y               {"Sell item X and update gold, store":.<24}
 
-!loot X                   {"Unlock one copy and add it to character inventory for 0gp":.<24}
-!loot X design            {"Unlock all copies and adds them to store inventory":.<24}
+# !loot X                   {"Unlock one copy and add it to character inventory for 0gp":.<24}
+# !loot X design            {"Unlock all copies and adds them to store inventory":.<24}
 
-!ability list             {"Display list of Lvl 2+ abilities in character pool":.<24}
+# !ability list             {"Display list of Lvl 2+ abilities in character pool":.<24}
 
-!item list                {"Display a list of item in character inventory":.<24}
-!item X details           {"Displays details for item X"}
+# !item list                {"Display a list of item in character inventory":.<24}
+# !item X details           {"Displays details for item X"}
 
-!teamstats                {"Get Donations, Prosperity, and Reputation"}
-!gain/lose pros           {"Check 1 box on Prosperity track":.<24}
-  Automatically checks for Overall Prosperity increase and unlcoks new itemsx
-!gain/lose rep            {"Add 1 reputation for the author's party":.<24}
-
-
-!discover/unlock X "Name" "Description"    {"Unlockss a new scenario and updates Name and Description":.<24}
-  Name and Description must be separately wrapped in quotes
-!complete X               {"Mark a scenario complete":.<24}
-!scenario X details       {"Shows info and details about the scenario":.<24}
-!scenario X description   {"Update the description for scenario X":.<24}
-"""
-
-    await ctx.send(f"```{message}```")
+# !teamstats                {"Get Donations, Prosperity, and Reputation"}
+# !gain/lose pros           {"Check 1 box on Prosperity track":.<24}
+#   Automatically checks for Overall Prosperity increase and unlcoks new itemsx
+# !gain/lose rep            {"Add 1 reputation for the author's party":.<24}
 
 
+# !discover/unlock X "Name" "Description"    {"Unlockss a new scenario and updates Name and Description":.<24}
+#   Name and Description must be separately wrapped in quotes
+# !complete X               {"Mark a scenario complete":.<24}
+# !scenario X details       {"Shows info and details about the scenario":.<24}
+# !scenario X description   {"Update the description for scenario X":.<24}
+# """
 
-
-
-
-
-
+#     await ctx.send(f"```{message}```")
 
 
 bot.run(DISCORD_TOKEN)

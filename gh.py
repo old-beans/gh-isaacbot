@@ -1,6 +1,6 @@
 #! python
 from airtable import Airtable
-import discord, fstrings, re, random, os
+import re, random, os
 from datetime import datetime
 
 # datetime object containing current date and time
