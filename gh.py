@@ -26,8 +26,8 @@ achievements_airtable = Airtable(AIRTABLE_BASE_KEY, "Achievements")
 
 
 class Player:
-    character_levels = (0, 45, 95, 150, 210, 275, 345, 420, 500)
-    prosperity_levels = (0, 4, 9, 15, 22, 30, 39, 50, 64)
+    CHARACTER_LEVELS = (0, 45, 95, 150, 210, 275, 345, 420, 500)
+    PROSPERITY_LEVELS = (0, 4, 9, 15, 22, 30, 39, 50, 64)
 
     def __init__(self, author):
         self.name = author
@@ -44,7 +44,7 @@ class Player:
         self.world = World(campaign_airtable.match("name", "Camp Pain")["id"])
         self.party = Party(party_airtable.match("name", "Wyld Stallyns")["id"])
         prosperity = self.world.prosperity
-        xp = self.character_levels[prosperity]
+        xp = self.CHARACTER_LEVELS[prosperity]
         gold = (prosperity + 1) * 15
         charclass = classes_airtable.match("name", ch_class)["id"]
         characters_airtable.insert(
@@ -69,8 +69,8 @@ class Player:
 
 class World:
     # campaign_rec, name, donations, pticks, prosperity, achievements
-    prosperity_levels = (0, 4, 9, 15, 22, 30, 39, 50, 64)
-    donation_levels = (100, 150, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000)
+    PROSPERITY_LEVELS = (0, 4, 9, 15, 22, 30, 39, 50, 64)
+    DONATION_LEVELS = (100, 150, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000)
 
     def __init__(self, campaign_rec_id):
         # Use World(character.campaign[0])
@@ -83,11 +83,11 @@ class World:
         self.achievements = self.campaign_rec["fields"]["achievements"]
 
     def prosperity_calc(self, pticks):
-        for i in range(len(self.prosperity_levels)):
+        for i in range(len(self.PROSPERITY_LEVELS)):
             # calculate prosperity from the prosperity_levels tuple
             if (
-                pticks >= self.prosperity_levels[i]
-                and pticks < self.prosperity_levels[i + 1]
+                pticks >= self.PROSPERITY_LEVELS[i]
+                and pticks < self.PROSPERITY_LEVELS[i + 1]
             ):
                 prosperity = i + 1
                 break
@@ -97,7 +97,7 @@ class World:
 
     def gain_prosperity(self):
         self.gain_ptick()
-        if self.pticks in self.prosperity_levels:
+        if self.pticks in self.PROSPERITY_LEVELS:
             self.prosperity += 1
             print(
                 f"[Isaacbot Logger]--{datetime.now()}-- +1 Overall Prosperity....{self.name}, {self.prosperity}"
@@ -146,12 +146,12 @@ class World:
         )
 
     def calc_donations_needed(self):
-        for d in range(len(self.donation_levels)):
+        for d in range(len(self.DONATION_LEVELS)):
             if (
-                self.donations >= self.donation_levels[d]
-                and self.donations < self.donation_levels[d + 1]
+                self.donations >= self.DONATION_LEVELS[d]
+                and self.donations < self.DONATION_LEVELS[d + 1]
             ):
-                self.next_donation_level = self.donation_levels[d + 1]
+                self.next_donation_level = self.DONATION_LEVELS[d + 1]
                 return self.next_donation_level
 
 

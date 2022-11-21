@@ -1,21 +1,17 @@
 # Isaac the Record Master
 # Discord bot
 
-import discord
 import re
-import random
 import os
 from dotenv import load_dotenv
-
-load_dotenv()
 from airtable import Airtable
+import discord
 from discord.ext import commands
 from datetime import datetime
 import gh
-from gh import World, Scenario, Party, Character, Item, Ability, Player
+from gh import *
 
-# perks_airtable = Airtable(AIRTABLE_BASE_KEY, perks_sheet) # perks record lookup
-
+load_dotenv()
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")  # stored in .env
 intents = discord.Intents.all()
@@ -97,11 +93,11 @@ async def retire(ctx, *quest):
 
     if quest:
         character.retire(quest[0].strip(","))
+
     else:
         character.retire()
 
     message = f'Congratulations on your retirement. To begin a new character, use !newch "Character Name" "Character Class"'
-
     await ctx.send(f"```{message}```")
 
 
@@ -114,7 +110,7 @@ async def teamstats(ctx):
 
     message = f"""{world.name}:   
   {f"{world.donations}gp donated":.<18}+1 prosperity at {world.calc_donations_needed()}gp
-  {f"Prosperity {world.prosperity}":.<18}{world.pticks}/{world.prosperity_levels[world.prosperity]}
+  {f"Prosperity {world.prosperity}":.<18}{world.pticks}/{world.PROSPERITY_LEVELS[world.prosperity]}
 
 {party.name}:
   {f"Reputation: {party.reputation}":.<18}Discount: {party.discount}"""
@@ -144,13 +140,13 @@ async def donate(ctx):
         world.donate()
         message = f"The Sanctuary of the Great Oak thanks you. Have a blessed battle!\nDonations: {world.donations}......{character.name}: {character.gold} gold left"
 
-        if world.donations in world.donation_levels:
+        if world.donations in world.DONATION_LEVELS:
             if world.donations == 100:
                 message = f"{message}\n\nThe Sanctuary has received a total of 100 gold in donations.\nPlease open Envelope B."
             world.gain_prosperity()
-            message = f"{message}\n\n+1 prosperity......{world.pticks}/{world.prosperity_levels[world.prosperity]}"
+            message = f"{message}\n\n+1 prosperity......{world.pticks}/{world.PROSPERITY_LEVELS[world.prosperity]}"
 
-            if world.pticks == world.prosperity_levels[world.prosperity - 1]:
+            if world.pticks == world.PROSPERITY_LEVELS[world.prosperity - 1]:
                 message = f"{message}\n\n*The Overall Prosperity has increased to {world.prosperity}*\nNew items are now available in the item store.\nAll characters may level up to Lvl{world.prosperity} while in Gloomhaven."
 
     await ctx.send(f"```{message}```")
@@ -207,9 +203,9 @@ async def gain(ctx, thing_to_gain, *thing):
 
     elif "pros" in thing_to_gain:
         world.gain_prosperity()
-        message = f"{world.name} +1 Prosperity:\nProsperity: {world.pticks}/{world.prosperity_levels[world.prosperity]}    Overall: {world.prosperity}"
+        message = f"{world.name} +1 Prosperity:\nProsperity: {world.pticks}/{world.PROSPERITY_LEVELS[world.prosperity]}    Overall: {world.prosperity}"
 
-        if world.pticks == world.prosperity_levels[world.prosperity - 1]:
+        if world.pticks == world.PROSPERITY_LEVELS[world.prosperity - 1]:
             message = f"{message}\nThe Overall Prosperity has increased to {world.prosperity}\nNew items are now available in the item store.\nAll characters may level up to Lvl{world.prosperity} while in Gloomhaven."
 
     elif "xp" in thing_to_gain:
@@ -271,7 +267,7 @@ async def lose(ctx, thing_to_lose, *thing):
 
     elif "pros" in thing_to_lose:
 
-        if world.pticks in world.prosperity_levels:
+        if world.pticks in world.PROSPERITY_LEVELS:
 
             message = f"You're in luck. Prosperity cannot be descreased below its current cost."
 
@@ -279,7 +275,7 @@ async def lose(ctx, thing_to_lose, *thing):
 
             world.lose_ptick()
 
-            message = f"{world.name} -1 Prosperity\nProsperity: {world.pticks}/{world.prosperity_levels[world.prosperity]}    Overall: {world.prosperity}"
+            message = f"{world.name} -1 Prosperity\nProsperity: {world.pticks}/{world.PROSPERITY_LEVELS[world.prosperity]}    Overall: {world.prosperity}"
 
     elif "rep" in thing_to_lose:
 
@@ -446,51 +442,6 @@ async def display(ctx, option):
     await ctx.send(f"```{message}```")
 
 
-# @bot.command(aliases=['abil'])
-# async def ability(ctx, ability_num):
-#    # command input !ability X
-#    # adds selected abilities to the character pool
-#    # You can only add one at a time
-#    author = ctx.message.author.name
-#    character = Character(author)
-#
-#    ability = Ability(ability_num)
-#
-#    if ability.lvl <= character.lvl:
-#
-#        message = f"{ability.number}: {ability.name} -- {ability.charclass} Lvl {ability.lvl}"
-#
-#    else:
-#
-#        message = f"That ability is above your level. You can't see it until you earn it."
-#
-#    await ctx.send(f"```{message}```")
-
-
-# @bot.command()
-# async def item(ctx, item_num):
-#    # command input !item X
-#    # adds selected abilities to the character pool
-#    # You can only add one at a time
-#    author = ctx.message.author.name
-#    character = Character(author)
-#    party = Party(character.party[0])
-#    world = World(character.campaign[0])
-#
-#    item = Item(item_num)
-#
-#    if item.unlocked == True:
-#
-#        message = f"{item.num_name} -- {item.cost}gp\n{item.description}\n  Current stock: {item.numberAvailable}\n  Known copies: {item.maxCount}"
-#
-#    else:
-#
-#        message = "We don't have that item. Never even heard of it. Let us know if you find one!"
-#
-#
-#    await ctx.send(f"```{message}```")
-
-
 @bot.command(aliases=["scene", "scen", "s"])
 async def scenario(ctx, scene_no, *action_text):
     # !scenario 12 unlocked
@@ -612,26 +563,18 @@ async def sell(ctx, *item_nums):
 async def loot(ctx, item_num, *design):
 
     author = ctx.message.author.name
-
     character = Character(author)
     item = Item(item_num)
-
     design = list(design)
 
     if design:
-
         if item.unlocked == False:
-
             item.unlock_design()
-
             item = Item(item_num)
-
             message = f"Thank you, {character.name}! Our most skilled artisans will get right to work on crafting this...\nIt's Ready.\n{item.num_name} -- {item.cost}gp\n{item.description}"
 
         elif item.maxCount == item.realMax:
-
             item = Item(item.number)
-
             message = f"Thank you, but {item.num_name} is alrady unlocked. Please double check the item number."
 
     else:
@@ -647,7 +590,6 @@ async def loot(ctx, item_num, *design):
    Items: {sorted(character.item_nums)}"""
 
         else:
-
             message = f"{character.name} looted {item.num_name}!\nSince they already own a copy, the item is now available for purchase.\n{item.num_name} -- {item.cost}gp\n{item.description}"
 
     await ctx.send(f"```{message}```")
@@ -681,6 +623,51 @@ async def complete_scenario(ctx, scene_no):
     if scenario.unlocked == True:
 
         scenario.mark_complete()
+
+
+# @bot.command(aliases=['abil'])
+# async def ability(ctx, ability_num):
+#    # command input !ability X
+#    # adds selected abilities to the character pool
+#    # You can only add one at a time
+#    author = ctx.message.author.name
+#    character = Character(author)
+#
+#    ability = Ability(ability_num)
+#
+#    if ability.lvl <= character.lvl:
+#
+#        message = f"{ability.number}: {ability.name} -- {ability.charclass} Lvl {ability.lvl}"
+#
+#    else:
+#
+#        message = f"That ability is above your level. You can't see it until you earn it."
+#
+#    await ctx.send(f"```{message}```")
+
+
+# @bot.command()
+# async def item(ctx, item_num):
+#    # command input !item X
+#    # adds selected abilities to the character pool
+#    # You can only add one at a time
+#    author = ctx.message.author.name
+#    character = Character(author)
+#    party = Party(character.party[0])
+#    world = World(character.campaign[0])
+#
+#    item = Item(item_num)
+#
+#    if item.unlocked == True:
+#
+#        message = f"{item.num_name} -- {item.cost}gp\n{item.description}\n  Current stock: {item.numberAvailable}\n  Known copies: {item.maxCount}"
+#
+#    else:
+#
+#        message = "We don't have that item. Never even heard of it. Let us know if you find one!"
+#
+#
+#    await ctx.send(f"```{message}```")
 
 
 # @bot.command(aliases=['Help'])
