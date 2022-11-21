@@ -1,11 +1,12 @@
 # Isaac the Record Master
-# Discord bot 
+# Discord bot
 
 import discord
-import re 
+import re
 import random
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 from airtable import Airtable
 from discord.ext import commands
@@ -16,19 +17,30 @@ from gh import World, Scenario, Party, Character, Item, Ability, Player
 # perks_airtable = Airtable(AIRTABLE_BASE_KEY, perks_sheet) # perks record lookup
 
 
-DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')  # stored in .env
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")  # stored in .env
 intents = discord.Intents.all()
 intents.message_content = True
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix="!", intents=intents)
+
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Activity(name='Test'))
-    print('Logged in as {0.user}'.format(bot))
+    await bot.change_presence(activity=discord.Activity(name="Test"))
+    print("Logged in as {0.user}".format(bot))
 
 
-
-@bot.command(aliases=['changecharacter', 'changechar', 'changech', 'switch_character',  'switchcharacter', 'switchchar', 'switchch', 'switch'])
+@bot.command(
+    aliases=[
+        "changecharacter",
+        "changechar",
+        "changech",
+        "switch_character",
+        "switchcharacter",
+        "switchchar",
+        "switchch",
+        "switch",
+    ]
+)
 async def change_character(ctx, ch_name):
     # !change_character 'Gunga Galunga'
     author = ctx.message.author.name
@@ -54,26 +66,29 @@ async def change_character(ctx, ch_name):
     await ctx.send(f"```{message}```")
 
 
-@bot.command(aliases=['newch', 'newcharacter', 'createch', 'create_character', 'createchar'])
+@bot.command(
+    aliases=["newch", "newcharacter", "createch", "create_character", "createchar"]
+)
 async def new_character(ctx, ch_name, ch_class):
     author = ctx.message.author.name
-    
+
     try:
         old_character = Character(author)
         old_character.deactivate()
         player.create_character(ch_name, ch_class)
         character = Character(author)
         message = f"Welcome, {character.name}\nThis is now your active character."
-    
+
     except:
         pass
-    
+
     player = Player(author)
     player.create_character(ch_name, ch_class)
     character = Character(author)
     message = f"Welcome, {character.name}\nThis is now your active character."
-    
+
     await ctx.send(f"```{message}```")
+
 
 @bot.command()
 async def retire(ctx, *quest):
@@ -81,16 +96,16 @@ async def retire(ctx, *quest):
     character = Character(author)
 
     if quest:
-        character.retire(quest[0].strip(','))
+        character.retire(quest[0].strip(","))
     else:
         character.retire()
 
     message = f'Congratulations on your retirement. To begin a new character, use !newch "Character Name" "Character Class"'
-    
+
     await ctx.send(f"```{message}```")
 
 
-@bot.command(aliases=["getall","worldstats","campaignstats","partystats"])
+@bot.command(aliases=["getall", "worldstats", "campaignstats", "partystats"])
 async def teamstats(ctx):
     author = ctx.message.author.name
     character = Character(author)
@@ -103,18 +118,18 @@ async def teamstats(ctx):
 
 {party.name}:
   {f"Reputation: {party.reputation}":.<18}Discount: {party.discount}"""
-# Global Achievements: {world.achievements}
-# Party Achievements: {party.achievements}""")
-    
+    # Global Achievements: {world.achievements}
+    # Party Achievements: {party.achievements}""")
+
     await ctx.send(f"```{message}```")
 
 
-@bot.command(aliases=["donation","makedonation"])
+@bot.command(aliases=["donation", "makedonation"])
 async def donate(ctx):
-    #Adds a donation to the total and asjusts player gold.
-    #+1 propserity tick when appropriate
-    #+1 overall prosperity when appropriate
-    #Updates overall propserity when applicable
+    # Adds a donation to the total and asjusts player gold.
+    # +1 propserity tick when appropriate
+    # +1 overall prosperity when appropriate
+    # Updates overall propserity when applicable
     author = ctx.message.author.name
     character = Character(author)
     world = World(character.campaign[0])
@@ -123,12 +138,11 @@ async def donate(ctx):
     if character.gold < 10:
 
         message = f"You only have {character.gold}. Better pick up some more goin in the next battle, or check your stats."
-            
+
     else:
         character.gain_gold(-10)
-        world.donate()        
+        world.donate()
         message = f"The Sanctuary of the Great Oak thanks you. Have a blessed battle!\nDonations: {world.donations}......{character.name}: {character.gold} gold left"
-
 
         if world.donations in world.donation_levels:
             if world.donations == 100:
@@ -138,24 +152,24 @@ async def donate(ctx):
 
             if world.pticks == world.prosperity_levels[world.prosperity - 1]:
                 message = f"{message}\n\n*The Overall Prosperity has increased to {world.prosperity}*\nNew items are now available in the item store.\nAll characters may level up to Lvl{world.prosperity} while in Gloomhaven."
-                
+
     await ctx.send(f"```{message}```")
 
 
-@bot.command(aliases=['add'])
-async def gain (ctx, thing_to_gain, *thing):
+@bot.command(aliases=["add"])
+async def gain(ctx, thing_to_gain, *thing):
     author = ctx.message.author.name
     character = Character(author)
     world = World(character.campaign[0])
     party = Party(character.party[0])
 
-    if thing_to_gain == 'item':
-        item_num = thing[0].strip(',')
+    if thing_to_gain == "item":
+        item_num = thing[0].strip(",")
         item = Item(item_num)
         if item.unlocked == True:
             if item.number not in character.item_nums:
                 if item.numberAvailable > 0:
-                    character.item_transaction('gain', item.number)
+                    character.item_transaction("gain", item.number)
                     message = f"{character.name} gained {item.num_name}.\n  Items: {character.item_nums}"
 
                 else:
@@ -166,9 +180,9 @@ async def gain (ctx, thing_to_gain, *thing):
         else:
             message = f"Item {item.number} is not unlocked. Use !loot to add scenario loot or items unlocked via road or city event."
 
-    elif thing_to_gain == 'ability':
+    elif thing_to_gain == "ability":
         if len(character.abilities) < character.lvl - 1:
-            ability_num = thing[0].strip(',')
+            ability_num = thing[0].strip(",")
             ability = Ability(ability_num)
 
             if character.lvl < int(ability.lvl):
@@ -177,40 +191,40 @@ async def gain (ctx, thing_to_gain, *thing):
             else:
                 if character.charclass != ability.charclass:
                     message = f"Please choose an ability card from your own dang class."
-                else: 
-                    if ability.ability['id'] in character.abilities:
+                else:
+                    if ability.ability["id"] in character.abilities:
                         message = f"Ability {ability.number} is already in your pool. Please choose again."
 
                     else:
-                        character.abil_transaction('gain', ability.number)
+                        character.abil_transaction("gain", ability.number)
                         message = f"Level {ability.lvl} - {ability.name} [{ability.number}] added to your pool.\nAbilities: {sorted(character.abil_nums)}"
         else:
             message = f"You have added too many abilities. You are Level {character.lvl} so you can only have {character.lvl-1} level 2+ abilities in your pool."
 
-    elif 'rep' in thing_to_gain:
+    elif "rep" in thing_to_gain:
         party.gain_reputation()
         message = f"{party.name} +1 Reputation:\nReputation: {party.reputation}    Discount: {party.discount}"
 
-    elif 'pros' in thing_to_gain:
+    elif "pros" in thing_to_gain:
         world.gain_prosperity()
         message = f"{world.name} +1 Prosperity:\nProsperity: {world.pticks}/{world.prosperity_levels[world.prosperity]}    Overall: {world.prosperity}"
 
         if world.pticks == world.prosperity_levels[world.prosperity - 1]:
             message = f"{message}\nThe Overall Prosperity has increased to {world.prosperity}\nNew items are now available in the item store.\nAll characters may level up to Lvl{world.prosperity} while in Gloomhaven."
 
-    elif 'xp' in thing_to_gain:
+    elif "xp" in thing_to_gain:
         xp = int(re.sub("[^0-9]", "", thing_to_gain))
         lvl_up = character.gain_xp(xp)
         message = f"{character.name} gained {xp}xp\n{character.xp}xp {character.gold}gp {character.checks}{character.ch}"
         if lvl_up == True:
             message = f"{message}\nYou reached Level {character.lvl}! You may level up when you return to Gloomhaven."
 
-    elif 'gold' in thing_to_gain or 'gp' in thing_to_gain:
+    elif "gold" in thing_to_gain or "gp" in thing_to_gain:
         gold = int(re.sub("[^0-9]", "", thing_to_gain))
         character.gain_gold(gold)
         message = f"{character.name} gained {gold}gp\n{character.xp}xp {character.gold}gp {character.checks}{character.ch}"
 
-    elif 'ch' in thing_to_gain:
+    elif "ch" in thing_to_gain:
         checks = int(re.sub("[^0-9]", "", thing_to_gain))
         character.gain_checks(checks)
         message = f"{character.name} gained {checks}checks\n{character.xp}xp {character.gold}gp {character.checks}{character.ch}"
@@ -220,76 +234,72 @@ async def gain (ctx, thing_to_gain, *thing):
     await ctx.send(f"```{message}```")
 
 
-@bot.command(aliases=['remove'])
+@bot.command(aliases=["remove"])
 async def lose(ctx, thing_to_lose, *thing):
     author = ctx.message.author.name
     character = Character(author)
     world = World(character.campaign[0])
     party = Party(character.party[0])
 
-    if thing_to_lose == 'item':
-        item_num = thing[0].strip(',')
+    if thing_to_lose == "item":
+        item_num = thing[0].strip(",")
 
         item = Item(item_num)
-        
+
         if int(item.number) in character.item_nums:
 
-            character.item_transaction('lose', item.number)
+            character.item_transaction("lose", item.number)
 
             message = f"Item {item.number} has been removed from your inventory.\nItems: {sorted(character.item_nums)}"
 
         else:
-            
+
             message = f"You don't own that item. Please try again.\nItems: {sorted(character.item_nums)}"
 
-    elif thing_to_lose == 'ability':
-        ability_num = thing[0].strip(',')
+    elif thing_to_lose == "ability":
+        ability_num = thing[0].strip(",")
         ability = Ability(ability_num)
 
         if int(ability.number) in character.abil_nums:
-            
-            character.abil_transaction('lose', ability.number)
+
+            character.abil_transaction("lose", ability.number)
 
             message = f"Ability {ability.number} has been remove from your pool.\nAbilities: {sorted(character.abil_nums)}"
 
         else:
             message = f"That ability is not in your pool.\nAbilities: {sorted(character.abil_nums)}"
 
-    elif 'pros' in thing_to_lose:
-
+    elif "pros" in thing_to_lose:
 
         if world.pticks in world.prosperity_levels:
 
             message = f"You're in luck. Prosperity cannot be descreased below its current cost."
 
-
-        else: 
+        else:
 
             world.lose_ptick()
 
             message = f"{world.name} -1 Prosperity\nProsperity: {world.pticks}/{world.prosperity_levels[world.prosperity]}    Overall: {world.prosperity}"
 
-    elif 'rep' in thing_to_lose:
-
+    elif "rep" in thing_to_lose:
 
         party.lose_reputation()
 
         message = f"{party.name} -1 Reputation\nReputation: {party.reputation}     Discount: {party.discount}"
 
-    elif 'xp' in thing_to_lose:
-        
+    elif "xp" in thing_to_lose:
+
         xp = int(re.sub("[^0-9]", "", thing_to_lose))
-        
+
         lvl_up = character.gain_xp(-xp)
 
         message = f"{character.name} lost {xp}xp\n{character.xp}xp {character.gold}gp {character.checks}{character.ch}"
-        
-        
+
         if lvl_up == True:
 
             message = f"{message}\nYou reached Level {character.lvl}! You may level up when you return to Gloomhaven."
 
-    elif 'gold' in thing_to_lose or 'gp' in thing_to_lose:
+    elif "gold" in thing_to_lose or "gp" in thing_to_lose:
 
         gold = int(re.sub("[^0-9]", "", thing_to_lose))
 
@@ -297,20 +307,21 @@ async def lose(ctx, thing_to_lose, *thing):
 
         message = f"{character.name} lost {gold}gp\n{character.xp}xp {character.gold}gp {character.checks}{character.ch}"
 
-    elif 'ch' in thing_to_lose:
-        
+    elif "ch" in thing_to_lose:
+
         checks = int(re.sub("[^0-9]", "", thing_to_lose))
 
         if character.checks % 3 == 0:
 
-            message = f"You cannot lose a check because it would break up a compelte triplet."
-        
-        else:
-            
-            character.gain_checks(-checks)
-        
-            message = f"{character.name} lost {checks}checks\n{character.xp}xp {character.gold}gp {character.checks}{character.ch}"
+            message = (
+                f"You cannot lose a check because it would break up a compelte triplet."
+            )
 
+        else:
+
+            character.gain_checks(-checks)
+
+            message = f"{character.name} lost {checks}checks\n{character.xp}xp {character.gold}gp {character.checks}{character.ch}"
 
     await ctx.send(f"```{message}```")
 
@@ -324,70 +335,46 @@ async def stats(ctx, *stats_to_update):
     character = Character(author)
 
     if len(stats_to_update) > 0:
-
         for stat in stats_to_update:
-
-            if 'x' in stat:                
-
+            if "x" in stat:
                 xp = int(re.sub("[^0-9]", "", stat))
 
-                if '+' in stat:
-
+                if "+" in stat:
                     lvl_up = character.gain_xp(xp)
                     character = Character(author)
 
                 else:
-
                     lvl_up = character.change_xp(xp)
                     character = Character(author)
 
-
                 if lvl_up == True:
+                    await ctx.send(
+                        f"You reached Level {character.lvl}! You may level up when you return to Gloomhaven."
+                    )
 
-                    await ctx.send(f"You reached Level {character.lvl}! You may level up when you return to Gloomhaven.")
-
-
-            if 'g' in  stat:                
-
+            if "g" in stat:
                 gold = int(re.sub("[^0-9]", "", stat))
 
-                
-                if '+' in stat:
-
+                if "+" in stat:
                     character.gain_gold(gold)
-
-                        
                 else:
-
                     character.change_gold(gold)
 
-                
-
-            if 'ch' in stat:                
-
+            if "ch" in stat:
                 checks = int(re.sub("[^0-9]", "", stat))
-
-                
-                if '+' in stat:
-
+                if "+" in stat:
                     character.gain_checks(checks)
-
-                    
                 else:
-                    
                     character.change_checks(checks)
 
-                            
                 if character.checks % 3 == 0:
-
                     await ctx.send(f"You earned your 3rd check. Gain a Perk!")
-            
 
     message = f"""{character.name} -- Lvl {character.lvl} -- {character.charclass}
     {character.xp}xp  -  {character.gold}gp  -  {character.checks}{character.ch}
  Abilities: {sorted(character.abil_nums)}
  Items:     {sorted(character.item_nums)}"""
-        
+
     await ctx.send(f"```{message}```")
 
 
@@ -399,27 +386,22 @@ async def levelup(ctx, *abil_nums):
 
     for abil_num in abil_nums:
         if ch_abil_count < character.lvl - 1:
-            abil_num = abil_num.strip(',')
+            abil_num = abil_num.strip(",")
             ability = Ability(abil_num)
 
             if character.lvl < int(ability.lvl):
-
                 message = f"That card ({ability.lvl}) is above your level ({character.lvl}). You must select a card of your current level or lower.\n Abilities: {character.abil_nums}"
 
             else:
-
                 if character.charclass != ability.charclass:
                     message = f"Please choose an ability card from your own dang class."
 
                 else:
-
-                    if ability.ability['id'] in character.abilities:
-                        
+                    if ability.ability["id"] in character.abilities:
                         message = f"Ability {ability.number} is already in your pool. Please choose again.\n Abilities: {character.abil_nums}"
-                    
-                    else:
 
-                        character.abil_transaction('gain', abil_num)
+                    else:
+                        character.abil_transaction("gain", abil_num)
                         ch_abil_count += 1
                         message = f"Level {ability.lvl} - {ability.name} [{ability.number}] added to your pool."
 
@@ -430,57 +412,42 @@ async def levelup(ctx, *abil_nums):
     await ctx.send(f"```{character.name}\n Abilities: {sorted(character.abil_nums)}```")
 
 
-@bot.command(aliases=['show', 'list', 'get'])
+@bot.command(aliases=["show", "list", "get"])
 async def display(ctx, option):
     author = ctx.message.author.name
     character = Character(author)
 
-    if option == 'abilities':
-        
+    if option == "abilities":
         message = f"{character.name} -- Lvl {character.lvl} -- {character.charclass}"
 
         for abil in sorted(character.abil_nums):
-
             abil = Ability(abil)
-
             message += f"\n {abil.num_name:35} {abil.number}"
-            
 
-    elif option == 'items':
-        
+    elif option == "items":
         message = f"{character.name} -- Lvl {character.lvl} -- {character.charclass}"
-
         for item in sorted(character.item_nums):
-
             item = Item(item)
-
             message += f"\n {item.num_name}"
 
-    elif option == 'fullstats':
-
-
+    elif option == "fullstats":
         message = f"{character.name} -- Lvl {character.lvl} -- {character.charclass}\n    {character.xp}xp  -  {character.gold}gp  -  {character.checks}{character.ch}\n Abilities:"
 
         for item in sorted(character.item_nums):
-
             item = Item(item)
-
             message += f"\n  {item.num_name:35} {item.cost}gp"
 
         message = f"{message}\n Items:"
 
         for abil in sorted(character.abil_nums):
-
             abil = Ability(abil)
-
-            message += f"\n  {abil.num_name:35} {abil.number}"        
-
+            message += f"\n  {abil.num_name:35} {abil.number}"
 
     await ctx.send(f"```{message}```")
 
 
-#@bot.command(aliases=['abil'])
-#async def ability(ctx, ability_num):
+# @bot.command(aliases=['abil'])
+# async def ability(ctx, ability_num):
 #    # command input !ability X
 #    # adds selected abilities to the character pool
 #    # You can only add one at a time
@@ -500,9 +467,8 @@ async def display(ctx, option):
 #    await ctx.send(f"```{message}```")
 
 
-
-#@bot.command()
-#async def item(ctx, item_num):
+# @bot.command()
+# async def item(ctx, item_num):
 #    # command input !item X
 #    # adds selected abilities to the character pool
 #    # You can only add one at a time
@@ -525,47 +491,33 @@ async def display(ctx, option):
 #    await ctx.send(f"```{message}```")
 
 
-@bot.command(aliases=['scene','scen', 's'])
+@bot.command(aliases=["scene", "scen", "s"])
 async def scenario(ctx, scene_no, *action_text):
-# !scenario 12 unlocked
-# !scenario 12 complete We ran away with the treasure
+    # !scenario 12 unlocked
+    # !scenario 12 complete We ran away with the treasure
     scenario = Scenario(scene_no)
     action_text = list(action_text)
 
-    info_words = ('details', 'info')
+    info_words = ("details", "info")
     if any(ele in action_text for ele in info_words):
 
         if scenario.unlocked == False:
-
-            message = f"Scenario {scene_no} has not been discovered yet."    
-
+            message = f"Scenario {scene_no} has not been discovered yet."
 
         elif scenario.unlocked == True and scenario.complete == False:
-
             message = f"{scene_no}: {scenario.name}"
-
-
-            if len(scenario.description) > 1: 
-
+            if len(scenario.description) > 1:
                 message = f"{scene_no}: {scenario.name}\n{scenario.description}"
 
-
         elif scenario.unlocked == True and scenario.complete == True:
-
             message = f"{scene_no}: {scenario.name} -- Complete"
-
             if len(scenario.description) > 1:
-
                 message = f"{message}\n{scenario.description}"
 
-    elif 'descr' in action_text[0]:
-
+    elif "descr" in action_text[0]:
         del action_text[0]
-
-        description_text = ' '.join(action_text)
-
-        scenario.update_description(description_text)   
-
+        description_text = " ".join(action_text)
+        scenario.update_description(description_text)
         message = f'Your notes about Scenario {scenario.number} have been saved.\n"{description_text}"'
 
     await ctx.send(f"```{message}```")
@@ -579,21 +531,21 @@ async def buy(ctx, *item_nums):
     party = Party(character.party[0])
 
     for item in item_nums:
-        item = item.strip(',')
+        item = item.strip(",")
         item = Item(item)
 
         if item.unlocked == True:
-            
+
             price = item.cost + party.discount
-            
-            if item.item_rec['id'] not in character.items: 
-                
+
+            if item.item_rec["id"] not in character.items:
+
                 if item.numberAvailable > 0:
 
                     if character.gold >= price:
 
                         character.gain_gold(-price)
-                        character.item_transaction('gain', item.number)
+                        character.item_transaction("gain", item.number)
                         # item.store_transaction(False)
                         character = Character(author)
                         message = f"{character.name} bought {item.num_name} for {price}gp\n{item.description}"
@@ -602,11 +554,11 @@ async def buy(ctx, *item_nums):
                     else:
                         message = f"You don't have enough gold. Better pick up some goin in the next battle."
                         await ctx.send(f"```{message}```")
-                        
-                else: 
+
+                else:
                     message = f"We're sold out at the moment. Come back when we get some in stock."
                     await ctx.send(f"```{message}```")
-                    
+
             else:
                 message = f"You already own {item.number} according to my ledger. Please try again or perhaps I could interest you in something a little...different?"
                 await ctx.send(f"```{message}```")
@@ -615,7 +567,9 @@ async def buy(ctx, *item_nums):
             message = f"We don't carry that item. I've heard of them but have never seen a design. If you find one, let us know using the '!loot {item.number}' or '!loot item design {item.number}'."
             await ctx.send(f"```{message}```")
 
-    await ctx.send(f"```Gold:  {character.gold}gp\nItems: {sorted(character.item_nums)}```")
+    await ctx.send(
+        f"```Gold:  {character.gold}gp\nItems: {sorted(character.item_nums)}```"
+    )
 
 
 @bot.command()
@@ -625,36 +579,40 @@ async def sell(ctx, *item_nums):
     character = Character(author)
 
     for item in item_nums:
-        item = item.strip(',')
+        item = item.strip(",")
         item = Item(item)
         price = int(item.cost / 2)
 
         if item.unlocked == True:
 
-            if item.item_rec['id'] in character.items:
+            if item.item_rec["id"] in character.items:
 
-                character.item_transaction('lose', item.number)
+                character.item_transaction("lose", item.number)
                 character.gain_gold(price)
 
-                message = f"{character.name} sold {item.number}: {item.name} for {price}gp."
+                message = (
+                    f"{character.name} sold {item.number}: {item.name} for {price}gp."
+                )
                 await ctx.send(f"```{message}```")
 
             else:
                 message = f"You don't own that item. Are you trying to pull a fast one, you son of a a bitch??"
                 await ctx.send(f"```{message}```")
 
-        else: 
+        else:
             message = f"You don't own that item. I've never even heard of that. Are you trying to pull one a fast one, you son of a a bitch??"
             await ctx.send(f"```{message}```")
 
-    await ctx.send(f"```Gold:  {character.gold}gp\nItems: {sorted(character.item_nums)}```")
+    await ctx.send(
+        f"```Gold:  {character.gold}gp\nItems: {sorted(character.item_nums)}```"
+    )
 
 
 @bot.command()
 async def loot(ctx, item_num, *design):
 
     author = ctx.message.author.name
-    
+
     character = Character(author)
     item = Item(item_num)
 
@@ -670,36 +628,32 @@ async def loot(ctx, item_num, *design):
 
             message = f"Thank you, {character.name}! Our most skilled artisans will get right to work on crafting this...\nIt's Ready.\n{item.num_name} -- {item.cost}gp\n{item.description}"
 
-
         elif item.maxCount == item.realMax:
 
             item = Item(item.number)
 
             message = f"Thank you, but {item.num_name} is alrady unlocked. Please double check the item number."
 
-
     else:
         item.unlock_loot()
         item = Item(item_num)
         if item.number not in character.item_nums:
 
-            character.item_transaction('loot', item.number)
+            character.item_transaction("loot", item.number)
 
             message = f"""{character.name} looted {item.num_name}! 
  {item.description}
    Gold:  {character.gold}gp
    Items: {sorted(character.item_nums)}"""
 
-
         else:
 
             message = f"{character.name} looted {item.num_name}!\nSince they already own a copy, the item is now available for purchase.\n{item.num_name} -- {item.cost}gp\n{item.description}"
 
-
     await ctx.send(f"```{message}```")
 
 
-@bot.command(aliases=['unlock', 'discover'])
+@bot.command(aliases=["unlock", "discover"])
 async def discover_scenario(ctx, scene_no, scene_name, *scene_description):
     # command input "!unlockscen 1 Black Barrow"
     # multi-word Scene Name's and Descriptions must be wrapped in ""
@@ -709,7 +663,7 @@ async def discover_scenario(ctx, scene_no, scene_name, *scene_description):
     # scene_name = ' '.join(scene_name)
     if scene_description:
         scenario.mark_unlocked(scene_name, description=scene_description)
-    
+
     else:
         scenario.mark_unlocked(scene_name)
 
@@ -718,7 +672,7 @@ async def discover_scenario(ctx, scene_no, scene_name, *scene_description):
     await ctx.send(f"```{message}```")
 
 
-@bot.command(aliases=['complete'])
+@bot.command(aliases=["complete"])
 async def complete_scenario(ctx, scene_no):
     # command input "!completescen 1"
 
@@ -733,9 +687,9 @@ async def complete_scenario(ctx, scene_no):
 # async def help(ctx):
 # # Get list of possible actions. alternative to !help
 
-    
+
 #     message = f"""
-# Greetings!  I am Isaac-Bot, the Record Keeper of Gloomhaven. 
+# Greetings!  I am Isaac-Bot, the Record Keeper of Gloomhaven.
 # Please select from the following commands  {"* = Optional":>}
 
 # --- NEW Commands ---
@@ -744,7 +698,7 @@ async def complete_scenario(ctx, scene_no):
 # !changecharacter "Character Name"
 
 # !stats *Xxp *Ygp *Zch     {"Update the author's stats":.<24}
-# Use a '+' in front of any cost to ADD to your current toal. eg !stats +12xp             
+# Use a '+' in front of any cost to ADD to your current toal. eg !stats +12xp
 # Mix Additions and Totals eg '!stats +24xp 49g +1ch'
 
 # !gain/add XYZ  {"Add to the author's current total":.<24}
@@ -783,7 +737,3 @@ async def complete_scenario(ctx, scene_no):
 
 
 bot.run(DISCORD_TOKEN)
-
-
-
-
