@@ -4,11 +4,8 @@
 import re
 import os
 from dotenv import load_dotenv
-from airtable import Airtable
 import discord
 from discord.ext import commands
-from datetime import datetime
-import gh
 from gh import *
 
 load_dotenv()
@@ -193,7 +190,7 @@ async def gain(ctx, thing_to_gain, *thing):
 
                     else:
                         character.abil_transaction("gain", ability.number)
-                        message = f"Level {ability.lvl} - {ability.name} [{ability.number}] added to your pool.\nAbilities: {sorted(character.abil_nums)}"
+                        message = f"Level {ability.lvl} - {ability.name} [{ability.number}] added to your pool.\nAbilities: {sorted(character.ability_numbers)}"
         else:
             message = f"You have added too many abilities. You are Level {character.lvl} so you can only have {character.lvl-1} level 2+ abilities in your pool."
 
@@ -256,14 +253,14 @@ async def lose(ctx, thing_to_lose, *thing):
         ability_num = thing[0].strip(",")
         ability = Ability(ability_num)
 
-        if int(ability.number) in character.abil_nums:
+        if int(ability.number) in character.ability_numbers:
 
             character.abil_transaction("lose", ability.number)
 
-            message = f"Ability {ability.number} has been remove from your pool.\nAbilities: {sorted(character.abil_nums)}"
+            message = f"Ability {ability.number} has been remove from your pool.\nAbilities: {sorted(character.ability_numbers)}"
 
         else:
-            message = f"That ability is not in your pool.\nAbilities: {sorted(character.abil_nums)}"
+            message = f"That ability is not in your pool.\nAbilities: {sorted(character.ability_numbers)}"
 
     elif "pros" in thing_to_lose:
 
@@ -368,7 +365,7 @@ async def stats(ctx, *stats_to_update):
 
     message = f"""{character.name} -- Lvl {character.lvl} -- {character.charclass}
     {character.xp}xp  -  {character.gold}gp  -  {character.checks}{character.ch}
- Abilities: {sorted(character.abil_nums)}
+ Abilities: {sorted(character.ability_numbers)}
  Items:     {sorted(character.item_nums)}"""
 
     await ctx.send(f"```{message}```")
@@ -386,7 +383,7 @@ async def levelup(ctx, *abil_nums):
             ability = Ability(abil_num)
 
             if character.lvl < int(ability.lvl):
-                message = f"That card ({ability.lvl}) is above your level ({character.lvl}). You must select a card of your current level or lower.\n Abilities: {character.abil_nums}"
+                message = f"That card ({ability.lvl}) is above your level ({character.lvl}). You must select a card of your current level or lower.\n Abilities: {character.ability_numbers}"
 
             else:
                 if character.charclass != ability.charclass:
@@ -394,7 +391,7 @@ async def levelup(ctx, *abil_nums):
 
                 else:
                     if ability.ability["id"] in character.abilities:
-                        message = f"Ability {ability.number} is already in your pool. Please choose again.\n Abilities: {character.abil_nums}"
+                        message = f"Ability {ability.number} is already in your pool. Please choose again.\n Abilities: {character.ability_numbers}"
 
                     else:
                         character.abil_transaction("gain", abil_num)
@@ -405,7 +402,7 @@ async def levelup(ctx, *abil_nums):
             message = f"You have added too many abilities. You are Level {character.lvl} so you can only have {character.lvl-1} level 2+ abilities in your pool."
         await ctx.send(f"```{message}```")
 
-    await ctx.send(f"```{character.name}\n Abilities: {sorted(character.abil_nums)}```")
+    await ctx.send(f"```{character.name}\n Abilities: {sorted(character.ability_numbers)}```")
 
 
 @bot.command(aliases=["show", "list", "get"])
@@ -416,7 +413,7 @@ async def display(ctx, option):
     if option == "abilities":
         message = f"{character.name} -- Lvl {character.lvl} -- {character.charclass}"
 
-        for abil in sorted(character.abil_nums):
+        for abil in sorted(character.ability_numbers):
             abil = Ability(abil)
             message += f"\n {abil.num_name:35} {abil.number}"
 
@@ -435,7 +432,7 @@ async def display(ctx, option):
 
         message = f"{message}\n Items:"
 
-        for abil in sorted(character.abil_nums):
+        for abil in sorted(character.ability_numbers):
             abil = Ability(abil)
             message += f"\n  {abil.num_name:35} {abil.number}"
 
